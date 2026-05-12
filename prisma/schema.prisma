@@ -1,0 +1,612 @@
+// BAESH — B2B program outcomes & verified youth records
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  INSTITUTION_ADMIN
+  PROGRAM_MANAGER
+  MENTOR
+  PARTICIPANT
+  COMPANY_RECRUITER
+}
+
+enum InstitutionType {
+  UNIVERSITY
+  PUBLIC_AGENCY
+  COMPANY
+  STARTUP_CENTER
+  LOCAL_GOVERNMENT
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ProgramCategory {
+  EDUCATION
+  STARTUP
+  CAPSTONE
+  HACKATHON
+  INTERNSHIP
+  YOUTH_PROGRAM
+}
+
+enum ProgramStatus {
+  DRAFT
+  RECRUITING
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ParticipantStatus {
+  INVITED
+  ACTIVE
+  DROPPED
+  COMPLETED
+  CERTIFIED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+enum TaskType {
+  ASSIGNMENT
+  TODO
+  MILESTONE
+  FINAL_OUTPUT
+  SURVEY
+  PRESENTATION
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+  REVISION_REQUIRED
+  APPROVED
+}
+
+enum FeedbackType {
+  GENERAL
+  TASK
+  MENTORING
+  EVALUATION
+}
+
+enum OutcomeType {
+  EMPLOYMENT
+  STARTUP
+  LOCAL_SETTLEMENT
+  AWARD
+  NEXT_PROGRAM
+  INVESTMENT
+  NONE
+}
+
+enum GeneratedReportStatus {
+  DRAFT
+  GENERATED
+  EXPORTED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REVOKED
+}
+
+enum OpportunityType {
+  JOB
+  STARTUP_PROGRAM
+  CONTEST
+  MENTORING
+  GOVERNMENT_SUPPORT
+  INTERNSHIP
+}
+
+enum RecommendationStatus {
+  RECOMMENDED
+  SAVED
+  APPLIED
+  DISMISSED
+}
+
+enum ProgramStaffRole {
+  PROGRAM_MANAGER
+  MENTOR
+}
+
+enum ProfileVisibility {
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  role             UserRole
+  institutionId    String?
+  profileImageUrl  String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  institution            Institution?            @relation(fields: [institutionId], references: [id])
+  programsCreated        Program[]               @relation("ProgramCreatedBy")
+  programParticipants    ProgramParticipant[]
+  programStaff           ProgramStaff[]
+  taskCreates            Task[]                  @relation("TaskCreatedBy")
+  feedbacksGiven        Feedback[]              @relation("FeedbackMentor")
+  evaluationsGiven      Evaluation[]            @relation("EvaluationEvaluator")
+  outcomesVerified      Outcome[]               @relation("OutcomeVerifier")
+  reportsGenerated      GeneratedReport[]       @relation("ReportGeneratedBy")
+  verifiedRecordsBy     VerifiedRecord[]        @relation("VerifiedByUser")
+  fileAssetsOwned        FileAsset[]             @relation("FileOwner")
+  auditLogs              AuditLog[]
+  invitesSent            Invite[]                @relation("InviteInviter")
+}
+
+model Institution {
+  id                 String             @id @default(cuid())
+  name               String
+  type               InstitutionType
+  region             String?
+  address            String?
+  website            String?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  users           User[]
+  programs        Program[]
+  reportTemplates ReportTemplate[]
+  fileAssets      FileAsset[]
+  auditLogs        AuditLog[]
+  invites          Invite[]
+  verifiedRecords  VerifiedRecord[]
+}
+
+model Program {
+  id                  String          @id @default(cuid())
+  institutionId       String
+  title               String
+  description         String?
+  category            ProgramCategory
+  objective           String?
+  targetParticipants   String?
+  startDate           DateTime
+  endDate             DateTime
+  status              ProgramStatus   @default(DRAFT)
+  capacity            Int?
+  location            String?
+  isOnline            Boolean         @default(false)
+  createdById         String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  institution          Institution           @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  createdBy            User                  @relation("ProgramCreatedBy", fields: [createdById], references: [id])
+  participants         ProgramParticipant[]
+  teams                Team[]
+  attendanceSessions   AttendanceSession[]
+  tasks                Task[]
+  feedbacks            Feedback[]
+  evaluationRubrics    EvaluationRubric[]
+  evaluations          Evaluation[]
+  outcomes             Outcome[]
+  generatedReports     GeneratedReport[]
+  verifiedRecords      VerifiedRecord[]
+  staff                ProgramStaff[]
+  invites              Invite[]
+  fileAssets           FileAsset[]
+
+  @@index([institutionId])
+  @@index([status])
+}
+
+/// PROGRAM_MANAGER / MENTOR scoped to a program (RBAC)
+model ProgramStaff {
+  id        String           @id @default(cuid())
+  programId String
+  userId    String
+  role      ProgramStaffRole
+  createdAt DateTime         @default(now())
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, userId, role])
+  @@index([userId])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  programId   String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  program      Program              @relation(fields: [programId], references: [id], onDelete: Cascade)
+  participants ProgramParticipant[]
+  submissions  TaskSubmission[]
+  feedbacks    Feedback[]
+  evaluations  Evaluation[]
+
+  @@index([programId])
+}
+
+model ProgramParticipant {
+  id            String            @id @default(cuid())
+  programId     String
+  userId        String
+  teamId        String?
+  status        ParticipantStatus @default(INVITED)
+  roleTitle     String?
+  joinedAt      DateTime          @default(now())
+  completedAt   DateTime?
+  finalScore    Float?
+  verifiedAt    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  program             Program              @relation(fields: [programId], references: [id], onDelete: Cascade)
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team                Team?                @relation(fields: [teamId], references: [id])
+  attendanceRecords   AttendanceRecord[]
+  taskSubmissions     TaskSubmission[]
+  feedbacks           Feedback[]
+  evaluations         Evaluation[]
+  outcomes            Outcome[]
+  verifiedRecords     VerifiedRecord[]
+  recommendations     Recommendation[]
+
+  @@unique([programId, userId])
+  @@index([programId])
+  @@index([userId])
+}
+
+model AttendanceSession {
+  id          String   @id @default(cuid())
+  programId   String
+  title       String
+  sessionDate DateTime
+  startTime   String?
+  endTime     String?
+  createdAt   DateTime @default(now())
+
+  program Program             @relation(fields: [programId], references: [id], onDelete: Cascade)
+  records AttendanceRecord[]
+
+  @@index([programId])
+}
+
+model AttendanceRecord {
+  id                   String           @id @default(cuid())
+  attendanceSessionId  String
+  participantId        String
+  status               AttendanceStatus
+  checkedAt            DateTime         @default(now())
+  note                 String?
+
+  session     AttendanceSession  @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  participant ProgramParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([attendanceSessionId, participantId])
+  @@index([participantId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  programId   String
+  title       String
+  description String?
+  type        TaskType
+  dueDate     DateTime?
+  required    Boolean   @default(true)
+  maxScore    Float?
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  program     Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  createdBy   User             @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  submissions TaskSubmission[]
+
+  @@index([programId])
+}
+
+model TaskSubmission {
+  id            String           @id @default(cuid())
+  taskId        String
+  participantId String
+  teamId        String?
+  title         String?
+  content       String?
+  status        SubmissionStatus @default(DRAFT)
+  submittedAt   DateTime?
+  reviewedAt    DateTime?
+  score         Float?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  task         Task               @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  participant  ProgramParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  team         Team?              @relation(fields: [teamId], references: [id])
+  files        FileAsset[]
+  feedbacks    Feedback[]
+
+  @@index([taskId])
+  @@index([participantId])
+}
+
+model FileAsset {
+  id               String   @id @default(cuid())
+  ownerId          String
+  institutionId    String
+  programId        String?
+  taskSubmissionId String?
+  reportId         String?
+  originalName     String
+  mimeType         String
+  size             Int
+  s3Key            String   @unique
+  url              String?
+  createdAt        DateTime @default(now())
+
+  owner          User                @relation("FileOwner", fields: [ownerId], references: [id])
+  institution    Institution         @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  program        Program?            @relation(fields: [programId], references: [id])
+  taskSubmission TaskSubmission?     @relation(fields: [taskSubmissionId], references: [id])
+  report         GeneratedReport?    @relation("ReportEvidenceFiles", fields: [reportId], references: [id])
+  outcomeEvidence Outcome[]          @relation("OutcomeEvidence")
+  pdfForReport    GeneratedReport?    @relation("ReportPdfFile")
+
+  @@index([institutionId])
+  @@index([taskSubmissionId])
+  @@index([reportId])
+}
+
+model Feedback {
+  id               String       @id @default(cuid())
+  programId        String
+  participantId    String?
+  teamId           String?
+  taskSubmissionId String?
+  mentorId         String
+  content          String
+  feedbackType     FeedbackType @default(GENERAL)
+  createdAt        DateTime     @default(now())
+
+  program        Program             @relation(fields: [programId], references: [id], onDelete: Cascade)
+  participant    ProgramParticipant? @relation(fields: [participantId], references: [id])
+  team           Team?               @relation(fields: [teamId], references: [id])
+  taskSubmission TaskSubmission?     @relation(fields: [taskSubmissionId], references: [id])
+  mentor         User                @relation("FeedbackMentor", fields: [mentorId], references: [id])
+
+  @@index([programId])
+  @@index([participantId])
+}
+
+model EvaluationRubric {
+  id           String   @id @default(cuid())
+  programId    String
+  title        String
+  description  String?
+  criteriaJson Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  evaluations Evaluation[]
+
+  @@index([programId])
+}
+
+model Evaluation {
+  id            String   @id @default(cuid())
+  programId     String
+  participantId String?
+  teamId        String?
+  evaluatorId   String
+  rubricId      String?
+  score         Float?
+  content       String?
+  strengths     String?
+  improvements  String?
+  createdAt     DateTime @default(now())
+
+  program     Program              @relation(fields: [programId], references: [id], onDelete: Cascade)
+  participant ProgramParticipant? @relation(fields: [participantId], references: [id])
+  team        Team?                @relation(fields: [teamId], references: [id])
+  evaluator   User                 @relation("EvaluationEvaluator", fields: [evaluatorId], references: [id])
+  rubric      EvaluationRubric?    @relation(fields: [rubricId], references: [id])
+
+  @@index([programId])
+  @@index([participantId])
+}
+
+model Outcome {
+  id              String       @id @default(cuid())
+  programId       String
+  participantId   String
+  type            OutcomeType
+  title           String
+  description     String?
+  organizationName String?
+  occurredAt      DateTime?
+  evidenceFileId  String?
+  verifiedById    String?
+  verifiedAt      DateTime?
+  createdAt       DateTime     @default(now())
+
+  program       Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  participant   ProgramParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  evidenceFile  FileAsset?         @relation("OutcomeEvidence", fields: [evidenceFileId], references: [id])
+  verifiedBy    User?              @relation("OutcomeVerifier", fields: [verifiedById], references: [id])
+
+  @@index([programId])
+  @@index([participantId])
+}
+
+model ReportTemplate {
+  id             String   @id @default(cuid())
+  institutionId  String?
+  title          String
+  description    String?
+  sectionsJson   Json
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  institution Institution?      @relation(fields: [institutionId], references: [id])
+  reports     GeneratedReport[]
+
+  @@index([institutionId])
+}
+
+model GeneratedReport {
+  id           String                @id @default(cuid())
+  programId    String
+  templateId   String?
+  title        String
+  summary      String?
+  metricsJson  Json
+  sectionsJson Json
+  status       GeneratedReportStatus @default(DRAFT)
+  pdfFileId    String?               @unique
+  generatedById String
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  program       Program         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  template      ReportTemplate? @relation(fields: [templateId], references: [id])
+  generatedBy   User            @relation("ReportGeneratedBy", fields: [generatedById], references: [id])
+  pdfFile       FileAsset?      @relation("ReportPdfFile", fields: [pdfFileId], references: [id])
+  evidenceFiles FileAsset[]     @relation("ReportEvidenceFiles")
+
+  @@index([programId])
+}
+
+model VerifiedRecord {
+  id                 String              @id @default(cuid())
+  participantId      String
+  programId          String
+  institutionId      String
+  title              String
+  summary            String?
+  role               String?
+  skillsJson         Json?
+  evidenceJson       Json?
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedById       String?
+  verifiedAt         DateTime?
+  publicSlug         String              @unique
+  visibility         ProfileVisibility   @default(UNLISTED)
+  publicFieldsJson   Json?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  participant ProgramParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  program     Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  institution Institution        @relation(fields: [institutionId], references: [id])
+  verifiedBy  User?              @relation("VerifiedByUser", fields: [verifiedById], references: [id])
+
+  @@index([programId])
+  @@index([institutionId])
+}
+
+model Opportunity {
+  id               String          @id @default(cuid())
+  type             OpportunityType
+  title            String
+  description      String?
+  organizationName String
+  region           String?
+  requirementsJson Json?
+  startDate        DateTime?
+  endDate          DateTime?
+  url              String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  recommendations Recommendation[]
+}
+
+model Recommendation {
+  id             String               @id @default(cuid())
+  participantId  String
+  opportunityId  String
+  score          Float
+  reason         String?
+  status         RecommendationStatus @default(RECOMMENDED)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  participant ProgramParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  opportunity Opportunity        @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([opportunityId])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  userId         String
+  institutionId  String?
+  action         String
+  targetType     String
+  targetId       String
+  metadataJson   Json?
+  createdAt      DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id])
+  institution Institution? @relation(fields: [institutionId], references: [id])
+
+  @@index([userId])
+  @@index([institutionId])
+  @@index([createdAt])
+}
+
+model Invite {
+  id            String    @id @default(cuid())
+  email         String
+  tokenHash     String    @unique
+  role          UserRole
+  institutionId String?
+  programId     String?
+  invitedById   String
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  institution Institution? @relation(fields: [institutionId], references: [id])
+  program     Program?     @relation(fields: [programId], references: [id])
+  invitedBy   User         @relation("InviteInviter", fields: [invitedById], references: [id])
+
+  @@index([email])
+}

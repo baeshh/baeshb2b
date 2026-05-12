@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: baesh
+      POSTGRES_PASSWORD: baesh
+      POSTGRES_DB: baesh
+    ports:
+      - "5433:5432"
+    volumes:
+      - baesh_pg:/var/lib/postgresql/data
+
+volumes:
+  baesh_pg:
