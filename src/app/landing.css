@@ -1,0 +1,345 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+.baesh-landing {
+  --brand-blue: #3182f6;
+  --brand-gradient: linear-gradient(135deg, #3182f6 0%, #7c3aed 100%);
+  --text-dark: #191f28;
+  --text-gray: #4e5968;
+  --bg-white: #ffffff;
+
+  background-color: var(--bg-white);
+  color: var(--text-dark);
+  overflow-x: hidden;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center top;
+  -webkit-font-smoothing: antialiased;
+}
+
+.baesh-landing *,
+.baesh-landing *::before,
+.baesh-landing *::after {
+  box-sizing: border-box;
+}
+
+.baesh-landing * {
+  margin: 0;
+  padding: 0;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    Roboto,
+    sans-serif;
+}
+
+.baesh-landing nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 640px) {
+  .baesh-landing nav {
+    padding: 16px 20px;
+  }
+}
+
+.baesh-landing .logo {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.5px;
+}
+
+.baesh-landing .nav-links a {
+  color: var(--text-gray);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 30px;
+  transition: color 0.2s;
+}
+
+.baesh-landing .nav-links a:hover {
+  color: var(--text-dark);
+}
+
+.baesh-landing .btn-premium {
+  background: var(--text-dark);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+  margin-left: 30px;
+  display: inline-block;
+  text-decoration: none;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.baesh-landing .btn-premium::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+}
+
+.baesh-landing .btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.baesh-landing .btn-premium:hover::after {
+  left: 150%;
+}
+
+.baesh-landing .hero {
+  padding: 160px 20px 100px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.baesh-landing .hero-title {
+  font-size: clamp(36px, 8vw, 68px);
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.baesh-landing .text-gradient {
+  background: var(--brand-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: baesh-landing-shine 4s linear infinite;
+}
+
+@keyframes baesh-landing-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.baesh-landing .hero-desc {
+  font-size: clamp(17px, 2.5vw, 22px);
+  color: var(--text-gray);
+  max-width: 700px;
+  margin-bottom: 50px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.baesh-landing .dashboard-wrapper {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 100px;
+}
+
+.baesh-landing .dashboard-mockup {
+  width: 100%;
+  height: 500px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 50px 100px -20px rgba(50, 50, 93, 0.15),
+    0 30px 60px -30px rgba(0, 0, 0, 0.2);
+  transform: rotateX(15deg) translateY(20px) scale(0.95);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.baesh-landing .dashboard-wrapper:hover .dashboard-mockup {
+  transform: rotateX(0deg) translateY(0px) scale(1);
+}
+
+.baesh-landing .mockup-header {
+  height: 60px;
+  border-bottom: 1px solid #f1f3f5;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.baesh-landing .mockup-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff5f56;
+  margin-right: 8px;
+  box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+}
+
+.baesh-landing .mockup-body {
+  display: flex;
+  height: 100%;
+  background: #fafbfc;
+  padding: 24px;
+  gap: 24px;
+}
+
+.baesh-landing .mockup-sidebar {
+  width: 200px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eaecef;
+}
+
+.baesh-landing .mockup-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.baesh-landing .mockup-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eaecef;
+  flex: 1;
+}
+
+.baesh-landing .mockup-card-top {
+  flex: 0.5;
+  display: flex;
+  gap: 24px;
+}
+
+.baesh-landing .section {
+  padding: 120px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.baesh-landing .section-title {
+  font-size: 36px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 80px;
+  letter-spacing: -0.5px;
+}
+
+.baesh-landing .grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.baesh-landing .card {
+  background: #ffffff;
+  padding: 50px 40px;
+  border-radius: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.baesh-landing .card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: var(--brand-gradient);
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s;
+}
+
+.baesh-landing .card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.baesh-landing .card:hover::after {
+  transform: scaleY(1);
+}
+
+.baesh-landing .card-icon {
+  width: 60px;
+  height: 60px;
+  background: #f8fafc;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  color: var(--brand-blue);
+  transition: all 0.3s ease;
+}
+
+.baesh-landing .card:hover .card-icon {
+  background: var(--brand-gradient);
+  color: white;
+  transform: translateY(-5px);
+  border-color: transparent;
+}
+
+.baesh-landing .card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-dark);
+}
+
+.baesh-landing .card p {
+  font-size: 16px;
+  color: var(--text-gray);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.baesh-landing .nav-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .baesh-landing .nav-links a {
+    margin-left: 16px;
+  }
+  .baesh-landing .btn-premium {
+    margin-left: 16px;
+    margin-top: 8px;
+  }
+}
