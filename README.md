@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BAESH B2B
 
-## Getting Started
+기관 프로그램 성과·증빙·보고서·검증 프로필을 다루는 **Next.js + Prisma** B2B SaaS입니다.
 
-First, run the development server:
+- **랜딩:** `src/app/page.tsx`, `src/app/landing.css` (Pretendard, 프리미엄 마케팅 페이지)
+- **저장소:** [github.com/baeshh/baeshb2b](https://github.com/baeshh/baeshb2b)
+
+## 로컬 실행
 
 ```bash
+cp .env.example .env   # DATABASE_URL, JWT_SECRET 등 설정
+npm install
+npx prisma migrate deploy
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000) — 랜딩, `/login` — 로그인.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 명령 | 설명 |
+|------|------|
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm run create-test-user` | 로컬 테스트 계정 생성 |
 
-## Learn More
+## 환경 변수
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`.env.example` 참고. `.env`는 Git에 올리지 마세요.
