@@ -1,3 +1,4 @@
+/** 루트(/) 프리미엄 랜딩 — 마크업·스타일은 landing.css */
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./landing.css";
